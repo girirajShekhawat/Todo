@@ -35,14 +35,36 @@ export const createTask= async function(req,res){
 export const updateTask= async function(req,res){
     try {
        const{id}=req.params;
-       const{tittle,task,isCompleted}=req.body;
+       const{task,isCompleted,_id}=req.body;
+      
+       let toDo= await Task.findById(_id);
+
+      if(!toDo){
+        return res.status(401).json(
+            {
+                msg:"task is not find"
+            }
+        )
+      }
+      
+      
+       
+      if(toDo.isCompleted && isCompleted){
+        return res.status(401).json(
+            {
+                msg:"this task is already completed"
+            }
+        )
+      }
+
+         
    
-       const toDo= await Task.findByIdAndUpdate(
-        id,
+         toDo= await Task.save(
+        
         {
-            tittle,
-            task,
-            isCompleted
+            tittle:tittle|| toDo.tittle,
+            task:task|| toDo.task,
+            isCompleted: isCompleted|| toDo.isCompleted,
         }
        )
 
@@ -67,7 +89,7 @@ export const deleteTask= async function(req,res){
 
     try {
         const{id}=req.params;
- 
+         console.log(id)
         const taskIsPresent=await Task.findById(id);
      
         if(!taskIsPresent){
@@ -90,5 +112,21 @@ export const deleteTask= async function(req,res){
     }
     
 
+}
+
+export const readTasks= async function(req,res){
+
+    try {
+     const task  = await Task.find()
+       return res.status(200).json({
+        task,
+        msg:"all the tasks"
+       })
+    } catch (error) {
+        return res.status(501).json({
+            msg:"something went wrong",
+            error
+        })
+    }
 }
 
